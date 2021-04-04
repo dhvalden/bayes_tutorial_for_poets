@@ -3,7 +3,7 @@
 <head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bayes_lm_tutorial</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>Bayes_for_poets</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -14259,19 +14259,36 @@ a.anchor-link {
 
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Bayesian-linear-regression-from-scratch-in-Julia">Bayesian linear regression from scratch in Julia<a class="anchor-link" href="#Bayesian-linear-regression-from-scratch-in-Julia">&#182;</a></h1>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In this notebook I will attempt to recreate <a href="https://zjost.github.io/bayesian-linear-regression/">this</a> tutorial of  Bayesian linear regression using Julia language, but with a prose and examples hopefully more relatable to a social scientist. I am helping myself by referring to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2885293/">this</a> paper and to the <a href="https://ora.ox.ac.uk/objects/uuid:bf6c3fb5-5208-4dfe-aa0a-6e6da45c0d87">doctoral thesis</a> of one of my excellent supervisors Richard P. Mann. This exercise has three main objectives. The first one is procrastination. If I'm going to waste my time I may as well waste it in some productive way. The second is to increase my limited understanting of Bayesian inference. I can always read some more manuals and explanations, but without some hands-on activity I will never be able to fully get it. Also, I want to share and refine this tutorial with my fellow social scientist, so we can make the knowledge of mathematical concepts more accesible, instead of keeping them under the custody of a reclusive band of nerds (myself included). And third, I want to learn Julia language. Julia is a relatively new programming language with a clear focus on scientific computing, with the added feature that can be compiled for performance. I'm getting fed up of Tidyverse users proclaiming their gospel, and Python 'data scientist' trying to apply deep learning to everything, and Julia looks like a nice escape from that.</p>
+<h1 id="Bayesian-linear-regression-for-poets">Bayesian linear regression for poets<a class="anchor-link" href="#Bayesian-linear-regression-for-poets">&#182;</a></h1><p><strong>Daniel Valdenegro Ibarra</strong></p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Since this is a tutorial of a fairly complex mathematical algorithm, the use of mathematical explressions will be inevitable. I'm not a mathematician, and probably I don't understand these concepts enough, but I will try my best to explain them clearly. Hopefully this effort will help me to understand them better with the added bonus of communicate them to you, the reader.</p>
+<p>In this notebook I will attempt to recreate <a href="https://zjost.github.io/bayesian-linear-regression/">this</a> tutorial of  Bayesian linear regression using Julia language, but with a prose and examples hopefully more relatable to a social scientist. I am helping myself by referring to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2885293/">this</a> paper and to the <a href="https://ora.ox.ac.uk/objects/uuid:bf6c3fb5-5208-4dfe-aa0a-6e6da45c0d87">doctoral thesis</a> of one of my excellent supervisors Richard P. Mann.</p>
 
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>This exercise has three main objectives:</p>
+<ul>
+<li>The first is procrastination. If I'm going to waste my time I may as well waste it in some productive way. </li>
+<li>The second is to increase my limited understanting of Bayesian inference. I can always read some more manuals and explanations, but without some hands-on activity I will never be able to fully get it. Also, I want to share and refine this tutorial with my fellow social scientist, so we can make the knowledge of mathematical concepts more accesible, instead of keeping them under the custody of a reclusive band of nerds (myself included). </li>
+<li>And third, I want to learn Julia language. Julia is a relatively new programming language with a clear focus on scientific computing, with the added feature that can be compiled for performance. I'm getting fed up of Tidyverse users proclaiming their gospel, and Python 'data scientist' trying to apply deep learning to everything, and Julia looks like a nice escape from that.</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Since this is a tutorial of a fairly complex mathematical algorithm, the use of mathematical expressions will be inevitable. I'm not a mathematician, and probably I don't understand these concepts enough, but I will try my best to explain them clearly. Hopefully, this effort will help me to understand Bayesian inference better, with the added bonus of communicate it to you, the reader.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="Section-1:-The-maths">Section 1: The maths<a class="anchor-link" href="#Section-1:-The-maths">&#182;</a></h1>
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
@@ -14315,7 +14332,7 @@ $$P(A \cap B) = P(A \mid B)P(B) \tag{2}$$
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Where $P(A \cap B)$ is the probability that both events A and B occur. We must note that $P(A \mid B)$ is not equal to $P(B \mid A)$.</p>
+<p>Where $P(A \cap B)$ is the probability that both events A and B occur, and if A and B are independent events, its caculated $P(A)P(B)$. We must note that $P(A \mid B)$ is not equal to $P(B \mid A)$.</p>
 
 </div>
 </div>
@@ -14332,7 +14349,7 @@ $$P(A \cap B) = P(B \cap A) \tag{3}$$
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Meaning that the joint propability of A and B is the same as the joint probability of B and A. Now, taken equation (2) and (3) into consideration we can also say that:</p>
+<p>Meaning that the joint propability of A and B is the same as the joint probability of B and A, because of the commutative property of multiplication. Now, taken equation (2) and (3) into consideration we can also say that:</p>
 
 </div>
 </div>
@@ -14370,12 +14387,18 @@ $$P(A \mid B) = \frac{P(B \mid A)P(A)}{P(B)} \tag{5}$$
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-$$y=\beta_{0}+\beta_{1}X+\epsilon \tag{6}$$
+$$y_{i}=w_{0}+w_{1}x_{i}+\epsilon_{i} \quad i = 1,\cdots, n \tag{6}$$
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In equation (6), $y$ is generally the outcome variable we are trying to model. Thier values can be known, and we are using its data to crate a model to predict future values of the variable, or we simply want to estimate the model parameters as a way to discribe its relationship with $X$. $X$ is the variable we used to describe $y$ and is generally called the predictor. the set of parameters $\{\beta_{0}, \beta_{1}, \epsilon\}$ are commonly called the intercept, the slope and the error, respectively. For simplicity, these parameters can be gruped into regression coeficients (intercept and slope), and noise (or error). These are unknown, and we hope to estimate them from the data.</p>
+<p>In equation (6), $y_i$ is the value of the $ith$ element of the outcome variable $\mathbf{y}$ we are trying to model.The $x_i$ is the $ith$ element of the variable $\mathbf{x}$ we use to describe $\mathbf{y}$ and is generally known as the predictor. The set of parameters $\{w_{0}, w_{1}, \epsilon_i\}$ are commonly called the intercept, the slope and the error, respectively. For simplicity, these parameters can be gruped into <em>weights</em> (intercept and slope), and noise (or error). These are unknown, and we hope to estimate them from the data. The data is composed by the column vectors (always in bold) $\mathbf{x} = \langle x_{1}, x_{2}, \dots, x_{n}\rangle$ and $\mathbf{y} = \langle y_{1}, y_{2}, \dots, y_{n}\rangle$. It is also very common to have multiple predictors in a linear regresion. If those are grouped together into a matrix  $\mathbf{X}$ and we group our <em>weights</em> into a column vector  $\mathbf{w}$ and the noise into a column vector $\mathbf{\varepsilon}$, we can use matrix notation to have a more general form for our linear regression model:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>$$\mathbf{y} = \mathbf{w}\mathbf{X} + \mathbf{\epsilon} \tag{7}$$</p>
 
 </div>
 </div>
@@ -14387,35 +14410,35 @@ $$y=\beta_{0}+\beta_{1}X+\epsilon \tag{6}$$
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Let $\theta$ denote any parameter we wish to estimate (e.g. any parameter of our linear regression) and let $data$ be the data we have available for that purpose. Then, using the Bayes law, the general way of obtaining the probability distribution for a parameter given the data available, is described by:</p>
+<p>Lets say now that we want to estimate our parameters $\mathbf{w}$ using the bayesian framework. Then, using the Bayes law, the general way of obtaining the probability distribution for our parameters given we have $\mathbf{y}$ and $\mathbf{X}$ available (wich are column vectors of values, meaning observed <strong>data</strong>) is described by:</p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-$$p(\theta \mid data) = \frac{p(data \mid \theta)p(\theta)}{p(data)} \tag{7}$$
+$$p(\mathbf{w} \mid \mathbf{y}, \mathbf{X}) = \frac{p(\mathbf{y} \mid \mathbf{w}, \mathbf{X})p(\mathbf{w} \mid \mathbf{X})}{p(\mathbf{y} \mid \mathbf{X})} \tag{8}$$
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In Bayesian jargon, the terms composing equation (7) have particular names. $p(\theta \mid data)$ is known as the <em>posterior</em> distribution, as it represents the distribution of $\theta$ <em>posterior</em> to observing (<em>given</em> that we have observed) the $data$. $p(\theta)$ is known as the <em>prior</em> distribution of the parameter, and it represents any prior belief or information we could have about $\theta$ (e.g. previous studies, general information, etc). If we don't have any prior information, there is methods of incorporating a <em>prior</em> with minimal information. $p(data \mid \theta)$ is known as the <em>likelihood</em> and can also be written $\mathcal{L}(\theta \mid data)$. In traditional frequentist estimation, the likelihood is used to estimate the unknown parameters of a given model, by maximising the likelihood function (whatever is the function in each particular case). This is known as <em>Maximum Likelihood Estimation (MLE)</em>. Maximising the likelihood function means obtaining the optimum set of parameters so it makes the observed data the most probable given our model. From a Bayesian point of view, this is not acceptable, because the goal of the Bayesian estimation is to find the most probable parameters given the data, $p(\theta \mid data)$, and not the most probable data given the parameters, $p(data \mid \theta) = \mathcal{L}(\theta \mid data)$, since, as we estated above $p(\theta \mid data) \neq p(data \mid \theta)$. Does this means traditional frequentist methods are irredeemably flawed? I don't think so. Instead, I think the frequentist approach has been misinterpreted, and everyone can continue using it with no problems as long they are aware of what is that it is estimating, and what are the limitations of said approach. Finally, $p(data)$, in the denominator if equation (7), is considered a normalizing constant which can be calculated by considering the numerator of equation (7) for all the possible values of $\theta$, since:</p>
+<p>In Bayesian jargon, the terms composing equation (8) have particular names. The term $p(\mathbf{w} \mid \mathbf{y}, \mathbf{X})$ is known as the <em>posterior</em> distribution, as it represents the distribution of $\mathbf{w}$ <em>posterior</em> to observing (<em>given</em> that we have observed) $\mathbf{y}$ and $\mathbf{X}$. The term $p(\mathbf{w} \mid \mathbf{X})$ is known as the <em>prior</em> distribution of the parameters and it represents any prior belief or information we could have about $\mathbf{w}$ (e.g. previous studies, general information, etc) given we have observed $\mathbf{X}$. If we don't have any prior information, there is methods of incorporating a <em>prior</em> with minimal information. The term $p(\mathbf{y} \mid \mathbf{w}, \mathbf{X})$ is known as the <em>likelihood</em>. In traditional frequentist estimation, the likelihood is used to estimate the unknown parameters of a given model, by maximising the likelihood function (whatever is the function in each particular case). This is known as <em>Maximum Likelihood Estimation (MLE)</em>. Maximising the likelihood function means obtaining the optimal set of parameters so it makes the observed $\mathbf{y}$ the most probable given our model. From a Bayesian point of view, this is not acceptable, because the goal of the Bayesian estimation is to find the most probable parameters given $\mathbf{y}$ and $\mathbf{X}$, $p(\mathbf{w} \mid \mathbf{y}, \mathbf{X})$, and not the most probable $\mathbf{y}$ given $\mathbf{w}$ and $\mathbf{X}$, $p(\mathbf{y} \mid \mathbf{w}, \mathbf{X})$, since, as we estated above $p(a \mid b) \neq p(b \mid a)$. Does this means traditional frequentist methods are irredeemably flawed? I don't think so. Instead, I think the frequentist approach has been misinterpreted, and everyone can continue using it with no problems as long they are aware of what is that it is estimating, and what are the limitations of said approach. Finally, the term $p(\mathbf{y} \mid \mathbf{X})$, in the denominator of equation (8) is considered a normalizing constant which can be calculated by considering the numerator of equation (8) for all the possible values of $\mathbf{w}$, since:</p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-$$p(data)=\int_{\theta}^{} p(data \mid \theta)p(\theta) \; d\theta \tag{8}$$
+$$p(\mathbf{y} \mid \mathbf{X})=\int_{\mathbf{w}}^{} p(\mathbf{y} \mid \mathbf{w}, \mathbf{X})p(\mathbf{w} \mid \mathbf{X}) \; d\mathbf{w} \tag{9}$$
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>If we observe equations (7) and (8) we can see that we only need to find a way to calculate the <em>likelihood</em>, $p(data \mid \theta)$, and the <em>prior</em>, $p(\theta)$, to estimate the <em>posterior</em> distribution of the parameter given the data, $p(\theta \mid data)$, since $p(data)$ depends only on those two as well. We will come back to equation (8) at the end of our estimation process, but for now this proportionality can be expressed as:</p>
+<p>If we observe equations (8) and (9) we can see that we only need to find a way to define the <em>likelihood</em>, $p(\mathbf{y} \mid \mathbf{w}, \mathbf{X})$, and the <em>prior</em>, $p(\mathbf{w} \mid \mathbf{X})$, to estimate the <em>posterior</em> distribution of the parameter, $p(\mathbf{w} \mid \mathbf{y}, \mathbf{X})$, since $p(\mathbf{y} \mid \mathbf{X})$ depends only on those two as well. This proportionality can be expressed as:</p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-$$p(\theta \mid data) \propto p(data \mid \theta)p(\theta)$$
+$$posterior \propto likelihood * prior$$
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
@@ -14426,7 +14449,145 @@ $$p(\theta \mid data) \propto p(data \mid \theta)p(\theta)$$
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Getting-the-likelihood-and-prior-of-our-parameters">Getting the <em>likelihood</em> and <em>prior</em> of our parameters<a class="anchor-link" href="#Getting-the-likelihood-and-prior-of-our-parameters">&#182;</a></h3>
+<h3 id="Getting-the-likelihood">Getting the <em>likelihood</em><a class="anchor-link" href="#Getting-the-likelihood">&#182;</a></h3>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>As it was stated above, the goal of Bayesian estimation is to provide a probability distribution of the posteriors. Hence, we should find a way to end up with a probability distribution from the multiplication of the <em>likelihood</em> and the <em>prior</em>.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In this example will are going to be lazy, and we are going to chose the case in which the solution to obtaining the <em>posterior</em> distribution is the easiest.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>So, recalling equation (7) and (6), we will assume that the noise term $\epsilon$ is normally distributed around each predicted value of $\mathbf{y}$ with a constant variance $\epsilon^2$ and precision $\frac{1}{\epsilon^2}$, which are the same assumptions made for traditional OLS regression.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Given the above assumptions, the <em>likelihood</em> function of our model is defined as:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+$$\begin{align}
+p(\mathbf{y} \mid \mathbf{w}, \mathbf{X}) &amp;= \mathcal{N} (\mathbf{y}; \mathbf{w}\mathbf{X},\epsilon^2) \tag{10}\\
+&amp;= \prod_{i = 1}^{N} \mathcal{N} (y_i; w_0 + w_1x_i,\epsilon^2) \tag{11}\\
+\end{align}$$
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Let's unpack this mouthful, shall we?</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Let's focus on equation (11), and let's unpack from the inside outwards. The terms inside the parenthesis are the parts of our model in equation (6). The big $\mathcal{N}$ is shorthand for $Normal$ and it represents the Gaussian probability density function $$ g(y) = \frac{1}{\sqrt{2\pi\sigma^2}} \mathcal{exp} \left( -\frac{(y - \mu)^2}{2\sigma^2} \right)$$ which requires two parameters: an expected value $\mu$ and a variance $\sigma^2$. The Gaussian function draws a bell shaped function. The expected value tells the function around which point start drawing the curve, and the variance tells the function how wide has to be the curve. In the case of equation (11) the expected value is the predicted value of our model $w_0 + w_1x_i$ for every $y_i$ minus the noise, and the variance is the noise squared $\epsilon^2$.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, if we evaluate equation (11) without applying the big operator $\prod$ what with obtain is the likelihood of each $y_i$ given our model, but we want the likelihood of all of them, the joint distribution. Since likelihoods are probabilities, and we asume each $y_i$ observation is independent, we can multiply them to get the joint probability distribution. Hence the use the $\prod$ operator, which ask us to multiply the result of the expression under it for all the elements $i=N$.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="Getting-the-prior">Getting the <em>prior</em><a class="anchor-link" href="#Getting-the-prior">&#182;</a></h3>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Aparently, the <em>prior</em> can have many forms, depending of what its the knowledge the researcher have about the parameter. However, it is highly convenient to create priors that, once they get multiplied by the likelihood, the resulting posterior is of the same kind as the prior. This is to create a <em>conjugate prior</em>. In our case, we would like to have a posterior describing a Gausiann probability distribution. Gaussians are conjugates of themselves, so our task is to construct a Gaussian prior.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+$$p(\mathbf{w} \mid \mathbf{X}) = \mathcal{N}(\mathbf{w}; m_0, S_{0}) \tag{12}$$
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In equation (12) we have constructed a relatively non-informative prior. We defined a Gaussian with zere mean, $m_0$ and covariance $S_0$. One might be tempted tu use a uniform distribution as a prior, trying to reflect an absolute ignorance about the shape of the parameters, and in fact many implementations of Bayesian regression use this <em>non-informative</em> prior. However, this is ill-advised, since, as Mann (2009, pp. 51) clearly states, a uniform prior does contain strong assumptions about the parameters, since in almost all the cases some hard boundaries are imposed over the uniform distribution, since not doing so will force the algorithm to explore an infinite parameter space before learning anything about the parameters.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="Getting-the-posterior">Getting the <em>posterior</em><a class="anchor-link" href="#Getting-the-posterior">&#182;</a></h3>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Finally, now we have to multiply the prior by the likelihood to get the probability density of the posterior:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+$$ p(\mathbf{w} \mid \mathbf{y}, \mathbf{X}) = \prod_{i = 1}^{N} \mathcal{N} (y_i; w_0 + w_1x_i,\epsilon^2) \times \mathcal{N}(\mathbf{w}; 0, S_{0}) \tag{13}$$
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Equation (13) is again a terrible mouthful. Thankfully, this particular situation has a known simplified form:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+$$ p(\mathbf{w} \mid \mathbf{y}, \mathbf{X}) = \mathcal{N}(\mathbf{w}; m_N,S_N) \tag{14}$$
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Where:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+$$ S_{N}^{-1} = S_{0}^{-1} + \frac{1}{\epsilon^2}\Phi^T\Phi \tag{15}$$
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>And:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+$$ m_N = S_N(S_{0}^{-1}m_0 + \frac{1}{\epsilon^2}\Phi^T\mathbf{y}) \tag{16}$$
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Where $\Phi$ is what is known as the <a href="https://en.wikipedia.org/wiki/Design_matrix"><em>design matrix</em></a>, which in our case is a matrix with the first column full of 1s and the second column is our predictor column vector $\mathbf{x}$.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>So, equations (14), (15) and (16) are the ones we need to run our simulation in Julia to perform a Bayesian linear regresion.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="Section-2:-The-code">Section 2: The code<a class="anchor-link" href="#Section-2:-The-code">&#182;</a></h1>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
